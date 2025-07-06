@@ -1,0 +1,31 @@
+多线程编译指令：
+串行：
+g++ main.cpp train.cpp guessing.cpp md5.cpp -o main -O2
+pthread:
+g++ main.cpp train.cpp guessing_pthread.cpp md5.cpp -o main -lpthread -O2
+OpenMP:
+g++ main.cpp train.cpp guessing_openMP.cpp md5.cpp -o main -fopenmp -O2
+
+
+正确性测试：
+串行：
+g++ correctness_guess.cpp train.cpp guessing.cpp md5.cpp -o testdata -O2
+pthread:
+g++ correctness_guess.cpp train.cpp guessing_pthread.cpp md5.cpp -o correctness_guess -lpthread -O2
+OpenMP:
+g++ correctness_guess.cpp train.cpp guessing_openMP.cpp md5.cpp -o correctness_guess -fopenmp -O2
+ 
+bash test.sh 2 1 8
+
+
+MPI编程:
+mpic++ main_mpi.cpp train.cpp guessing_mpi.cpp md5.cpp -o main_mpi -O2
+qsub qsub_mpi.sh
+
+mpic++ main_mpi_new.cpp train.cpp guessing_mpi_new.cpp md5.cpp -o main_mpi -O2
+
+
+
+qsub提交指令：
+qstat 查看
+qdel 《学号》 删除任务
