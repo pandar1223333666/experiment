@@ -22,6 +22,7 @@ class ChatRequest(BaseModel):
     """聊天请求模型"""
     message: str = Field(..., description="用户消息")
     session_id: Optional[str] = Field(None, description="会话ID，如果为空则创建新会话")
+   
     
 class SessionInfo(BaseModel):
     """会话信息模型"""
@@ -35,6 +36,7 @@ class SessionListResponse(BaseModel):
     sessions: List[SessionInfo] = Field(default_factory=list, description="会话列表")
     total: int = Field(0, description="会话总数")
 
+
 class FileUploadRequest(BaseModel):
     """文件上传请求模型"""
     session_id: Optional[str] = Field(None, description="会话ID，如果为空则创建新会话")
@@ -44,6 +46,7 @@ class FileUploadResponse(BaseModel):
     session_id: str = Field(..., description="会话ID")
     file_name: str = Field(..., description="文件名")
     content_length: int = Field(..., description="文件内容长度")
+
 
 class SearchResult(BaseModel):
     """搜索结果项模型"""
