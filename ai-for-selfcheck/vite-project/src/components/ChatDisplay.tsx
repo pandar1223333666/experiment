@@ -2,7 +2,7 @@
 
 import { Avatar, Paper, Typography, Box } from '@mui/material';
 import type { Message } from '../App';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ChatBubbleProps extends Message { }
 function ChatBubble({ role, content }: ChatBubbleProps) {
@@ -25,6 +25,29 @@ interface ChatDisplayProps {
 }
 function ChatDisplay({ messages }: ChatDisplayProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [inputHeight, setInputHeight] = useState(40); // 默认输入框高度
+
+  // 监听输入框高度变化
+  useEffect(() => {
+    const handleInputResize = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail && customEvent.detail.height) {
+        setInputHeight(customEvent.detail.height);
+      }
+    };
+
+    document.addEventListener('chat-input-resize', handleInputResize);
+    return () => {
+      document.removeEventListener('chat-input-resize', handleInputResize);
+    };
+  }, []);
+
+  // 自动滚动到底部
+  useEffect(() => {
+    if (scrollRef.current && messages.length > 0) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, inputHeight]);
 
   // 恢复滚动位置
   useEffect(() => {
@@ -71,7 +94,8 @@ function ChatDisplay({ messages }: ChatDisplayProps) {
           margin: '0 auto',
           px: 2,
           py: 3,
-          paddingBottom: '140px',
+          // 根据输入框高度动态调整底部padding，确保聊天内容不被输入框遮挡
+          paddingBottom: `${120 + (inputHeight - 40)}px`,
         }}
       >
         {messages.map((msg, idx) => (

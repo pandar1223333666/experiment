@@ -176,8 +176,27 @@ body.dark-theme {
   line-height: 1.5;
   border-radius: 12px;
   height: 40px;
-  overflow-y: auto;
   background: transparent;
+  /* 滚动条样式 */
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 transparent;
+}
+
+.chat-input-textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-input-textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-input-textarea::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.dark-theme .chat-input-textarea::-webkit-scrollbar-thumb {
+  background: #4a4f57;
 }
 
 .dark-theme .chat-input-textarea {

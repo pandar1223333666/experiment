@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { FiSend, FiPaperclip } from 'react-icons/fi';
 
 interface ChatInputProps {
@@ -6,18 +6,61 @@ interface ChatInputProps {
 }
 
 function ChatInput({ onSend }: ChatInputProps) {
-  const [message, setMessage] = useState('');
-  // --- 保持滚动位置 ---
-  // 记录滚动位置
-  // 只需在组件挂载和卸载时处理
-  // 依赖于 chat-display-scroll-container 的 class
-  // 这里仅提供保存滚动位置的逻辑，实际恢复需在 ChatDisplay 组件实现
+  const [message, setMessage] = useState(() => {
+    // 从本地存储中恢复输入框内容
+    return localStorage.getItem('chatInputDraft') || '';
+  });
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // 调整文本区域高度的函数
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // 重置高度以获取正确的scrollHeight
+      textarea.style.height = 'auto';
+      // 设置新高度，但最大不超过200px
+      const newHeight = Math.min(textarea.scrollHeight, 200);
+      textarea.style.height = `${newHeight}px`;
+
+      // 当内容超过最大高度时显示滚动条
+      textarea.style.overflowY = textarea.scrollHeight > 200 ? 'auto' : 'hidden';
+
+      // 通知父组件输入框高度变化
+      document.dispatchEvent(new CustomEvent('chat-input-resize', {
+        detail: { height: newHeight }
+      }));
+    }
+  };
+
+  // 组件加载时调整高度
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, []);
+
+  // 监听消息变化时调整高度并保存到本地存储
+  useEffect(() => {
+    adjustTextareaHeight();
+    // 保存输入框内容到本地存储
+    localStorage.setItem('chatInputDraft', message);
+  }, [message]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim()) {
       onSend(message);
       setMessage('');
+      // 清除本地存储中的草稿
+      localStorage.removeItem('chatInputDraft');
+      // 重置输入框高度
+      if (textareaRef.current) {
+        textareaRef.current.style.height = '40px';
+        // 重置滚动条状态
+        textareaRef.current.style.overflowY = 'hidden';
+        // 通知高度变化
+        document.dispatchEvent(new CustomEvent('chat-input-resize', {
+          detail: { height: 40 }
+        }));
+      }
     }
   };
 
@@ -41,11 +84,12 @@ function ChatInput({ onSend }: ChatInputProps) {
     <div className="chat-input">
       <form onSubmit={handleSubmit} className="chat-input-form">
         <textarea
+          ref={textareaRef}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="询问任何问题->😊"
           className="chat-input-textarea"
-          rows={1}
+          style={{ overflowY: 'hidden' }} // 初始状态隐藏滚动条
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();

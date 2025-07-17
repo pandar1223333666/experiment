@@ -26,8 +26,8 @@ router = APIRouter()
 
 # 通义千问 API 配置
 QWEN_API_KEY = os.getenv("QWEN_API_KEY")
-if not QWEN_API_KEY:
-    raise RuntimeError("请先设置环境变量 QWEN_API_KEY")
+# if not QWEN_API_KEY:
+#     raise RuntimeError("请先设置环境变量 QWEN_API_KEY")
 
 class ChatService:
     """聊天服务类，处理聊天相关的业务逻辑"""
