@@ -1,0 +1,85 @@
+// --- START OF FILE ChatDisplay.tsx (修改后) ---
+
+import { Avatar, Paper, Typography, Box } from '@mui/material';
+import type { Message } from '../App';
+import { useEffect, useRef } from 'react';
+
+interface ChatBubbleProps extends Message { }
+function ChatBubble({ role, content }: ChatBubbleProps) {
+  const isUser = role === 'user';
+  return (
+    <Box display="flex" justifyContent={isUser ? 'flex-end' : 'flex-start'} alignItems="flex-start" mb={2} gap={1}>
+      {!isUser && <Avatar src="/ai.png" sx={{ width: 32, height: 32, mt: '4px' }} />}
+      <Paper elevation={0} sx={{ px: 2, py: 1, maxWidth: isUser ? '40%' : '50%', bgcolor: isUser ? 'primary.main' : 'grey.200', color: isUser ? 'white' : 'black', borderRadius: 4, }}>
+        <Typography variant="body1" sx={{ m: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, overflowWrap: 'break-word', wordBreak: 'break-word', }}>
+          {content}
+        </Typography>
+      </Paper>
+      {isUser && <Avatar src="/user.png" sx={{ width: 32, height: 32, mt: '4px' }} />}
+    </Box>
+  );
+}
+
+interface ChatDisplayProps {
+  messages: Message[];
+}
+function ChatDisplay({ messages }: ChatDisplayProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // 恢复滚动位置
+  useEffect(() => {
+    const saved = localStorage.getItem('chatScrollTop');
+    if (scrollRef.current && saved) {
+      scrollRef.current.scrollTop = parseInt(saved, 10);
+    }
+  }, []);
+
+  // 保存滚动位置
+  useEffect(() => {
+    const ref = scrollRef.current;
+    if (!ref) return;
+    const handler = () => {
+      localStorage.setItem('chatScrollTop', String(ref.scrollTop));
+    };
+    ref.addEventListener('scroll', handler);
+    return () => {
+      ref.removeEventListener('scroll', handler);
+    };
+  }, []);
+
+  return (
+    <Box
+      className="chat-display-scroll-container"
+      ref={scrollRef}
+      sx={{
+        // 让滚动条正常显示
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        overflowY: 'auto',
+        // 移除遮罩相关样式
+        WebkitMaskImage: 'none',
+        maskImage: 'none',
+      }}
+    >
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: '800px',
+          margin: '0 auto',
+          px: 2,
+          py: 3,
+          paddingBottom: '140px',
+        }}
+      >
+        {messages.map((msg, idx) => (
+          <ChatBubble key={idx} {...msg} />
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+export default ChatDisplay;
